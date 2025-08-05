@@ -17,6 +17,75 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       target: { tabId: tab.id },
       // 全機能をインライン実装（Chrome拡張の制限のため）
       function: () => {
+        // === Video Site Detection Functions ===
+        
+        function isVideoSite() {
+          const hostname = window.location.hostname.toLowerCase();
+          const videoSiteDomains = [
+            'youtube.com', 'youtu.be',
+            'nicovideo.jp', 'abema.tv', 'tver.jp', 'gyao.yahoo.co.jp',
+            'netflix.com', 'primevideo.com', 'amazon.com', 'amazon.co.jp',
+            'hulu.com', 'hulu.jp', 'disneyplus.com',
+            'vimeo.com', 'dailymotion.com', 'tiktok.com', 'twitch.tv',
+            'bilibili.com'
+          ];
+          
+          return videoSiteDomains.some(domain => hostname.includes(domain));
+        }
+        
+        function isVideoLink(element) {
+          const link = element.closest('a');
+          if (!link || !link.href) return false;
+          
+          const videoUrlPatterns = [
+            // YouTube系
+            /youtube\.com\/watch\?v=/,
+            /youtu\.be\//,
+            /youtube\.com\/shorts\//,
+            
+            // 日本の動画サイト
+            /nicovideo\.jp\/watch\//,
+            /abema\.tv\/channels\//,
+            /abema\.tv\/video\//,
+            /tver\.jp\/episode\//,
+            /gyao\.yahoo\.co\.jp\/player\//,
+            
+            // 海外配信サービス
+            /netflix\.com\/watch\//,
+            /netflix\.com\/title\//,
+            /amazon\.(com|co\.jp)\/gp\/video\//,
+            /primevideo\.com\//,
+            /hulu\.(com|jp)\/watch\//,
+            /disneyplus\.com\/video\//,
+            
+            // その他動画サイト
+            /vimeo\.com\/\d+/,
+            /dailymotion\.com\/video\//,
+            /tiktok\.com\/@[\w.]+\/video\/\d+/,
+            /twitch\.tv\/videos\//,
+            /bilibili\.com\/video\//,
+          ];
+          
+          return videoUrlPatterns.some(pattern => pattern.test(link.href));
+        }
+        
+        function getVideoUrl(element) {
+          const link = element.closest('a');
+          if (link && isVideoLink(element)) {
+            return link.href;
+          }
+          return window.location.href;
+        }
+        
+        function shouldLimitTextSelection(element) {
+          return isVideoSite() || isVideoLink(element);
+        }
+        
+        function limitTextLength(text, maxLength = 500) {
+          if (!text || text.length <= maxLength) return text;
+          return text.substring(0, maxLength) + '...（省略）';
+        }
+        
         // === Utility Functions ===
         
         function generateCSSSelector(element) {
@@ -383,13 +452,18 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
             // 選択されたテキストがある場合
             const selection = window.getSelection();
-            const selectedText = selection.toString().trim();
+            let selectedText = selection.toString().trim();
             
             if (selectedText) {
               const range = selection.getRangeAt(0);
               targetElement = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
                 ? range.commonAncestorContainer.parentElement
                 : range.commonAncestorContainer;
+              
+              // 動画サイトではテキスト選択を制限
+              if (shouldLimitTextSelection(targetElement)) {
+                selectedText = limitTextLength(selectedText);
+              }
               
               mediaInfo = {
                 type: 'text',
@@ -413,7 +487,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             }
 
             const cssSelector = generateCSSSelector(targetElement);
-            const currentUrl = window.location.href;
+            const currentUrl = getVideoUrl(targetElement);
             const formattedOutput = formatMediaForAI(mediaInfo, currentUrl, cssSelector);
 
             const copySuccess = await copyToClipboard(formattedOutput);
