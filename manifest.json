@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "WebSnip",
+  "version": "1.0.0",
+  "description": "Web content snipper with structural context for AI tools",
+  "permissions": [
+    "contextMenus",
+    "scripting",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "WebSnip"
+  }
+}
