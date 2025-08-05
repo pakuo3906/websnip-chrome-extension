@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSnip Icon Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        canvas { border: 2px solid #ccc; margin: 10px; }
+        .size-group { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>WebSnip Icon Generator</h1>
+    <p>Click the button to generate and download WebSnip icons</p>
+    
+    <button onclick="generateIcons()">Generate Icons</button>
+    
+    <div class="size-group">
+        <h3>16x16 Icon</h3>
+        <canvas id="icon16" width="16" height="16"></canvas>
+        <a id="download16" style="display:none;">Download 16x16</a>
+    </div>
+    
+    <div class="size-group">
+        <h3>48x48 Icon</h3>
+        <canvas id="icon48" width="48" height="48"></canvas>
+        <a id="download48" style="display:none;">Download 48x48</a>
+    </div>
+    
+    <div class="size-group">
+        <h3>128x128 Icon</h3>
+        <canvas id="icon128" width="128" height="128"></canvas>
+        <a id="download128" style="display:none;">Download 128x128</a>
+    </div>
+
+    <script>
+        function generateIcons() {
+            generateIcon(16);
+            generateIcon(48);
+            generateIcon(128);
+        }
+        
+        function generateIcon(size) {
+            const canvas = document.getElementById(`icon${size}`);
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#4285f4');
+            gradient.addColorStop(1, '#34a853');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add rounded corners effect
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            const radius = size * 0.125;
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.fill();
+            
+            // Reset composite operation
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Add "WS" text
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            if (size === 16) {
+                ctx.font = 'bold 10px Arial';
+                ctx.fillText('WS', size/2, size/2);
+            } else if (size === 48) {
+                ctx.font = 'bold 28px Arial';
+                ctx.fillText('WS', size/2, size/2);
+            } else {
+                ctx.font = 'bold 72px Arial';
+                ctx.fillText('WS', size/2, size/2);
+            }
+            
+            // Create download link
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const downloadLink = document.getElementById(`download${size}`);
+                downloadLink.href = url;
+                downloadLink.download = `icon${size}.png`;
+                downloadLink.style.display = 'inline';
+                downloadLink.textContent = `Download ${size}x${size}`;
+            });
+        }
+        
+        // Polyfill for roundRect if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+    </script>
+</body>
+</html>

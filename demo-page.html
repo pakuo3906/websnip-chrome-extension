@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSnip Demo Page - Chrome拡張機能デモ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .demo-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #4285f4;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            border-color: #4285f4;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.15);
+        }
+        
+        .feature-card h3 {
+            color: #34a853;
+            margin-top: 0;
+        }
+        
+        .demo-text {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #4285f4;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .demo-image {
+            width: 200px;
+            height: 120px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .demo-video {
+            width: 300px;
+            height: 200px;
+            background: #000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        
+        .demo-link {
+            color: #4285f4;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border: 2px solid #4285f4;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-link:hover {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .instruction {
+            background: #e8f5e8;
+            border: 2px solid #34a853;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .instruction h4 {
+            color: #137333;
+            margin-top: 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .step-number {
+            background: #4285f4;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+        
+        .context-menu-demo {
+            position: relative;
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .context-menu-demo::after {
+            content: "👆 このエリアで右クリックしてみてください";
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: #ffc107;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>🚀 WebSnip Chrome Extension</h1>
+            <p>AIツール用ウェブコンテンツコピー拡張機能のデモページ</p>
+        </div>
+        
+        <div class="instruction">
+            <h4>🎯 使い方 - How to Use</h4>
+            <div class="step">
+                <div class="step-number">1</div>
+                <span>下記のコンテンツの任意の場所で右クリック</span>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <span>「AI用にコピー」メニューを選択</span>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <span>構造化されたデータがクリップボードにコピーされます</span>
+            </div>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>📝 テキスト選択機能</h3>
+                <div class="demo-text">
+                    これは選択可能なテキストのサンプルです。このテキストを選択して右クリックすると、WebSnipがCSSセレクタと共に構造化された形式でコピーします。AIツールでの利用に最適化されたフォーマットで出力されます。
+                </div>
+                <p><strong>特徴:</strong> CSSセレクタ、要素の階層構造、選択範囲を含む詳細情報</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🖼️ 画像対応機能</h3>
+                <div class="demo-image" alt="WebSnip Demo Image">
+                    Demo Image<br>200x120px
+                </div>
+                <p><strong>特徴:</strong> 画像URL、サイズ、alt属性、ファイル形式を自動抽出</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🎥 動画対応機能</h3>
+                <div class="demo-video" title="Sample Video Content">
+                    ▶️ Sample Video<br>300x200px
+                </div>
+                <p><strong>特徴:</strong> HTML5動画、YouTube埋め込み動画の詳細情報を取得</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🔗 リンク対応機能</h3>
+                <a href="https://example.com" class="demo-link" title="Example Link">
+                    🌐 サンプルリンク - Example Link
+                </a>
+                <p><strong>特徴:</strong> URL、リンクテキスト、title属性、リンク先情報を抽出</p>
+            </div>
+        </div>
+        
+        <div class="context-menu-demo">
+            <h4>🎯 右クリックテスト エリア</h4>
+            <p>この黄色いエリア内で右クリックして「AI用にコピー」メニューをテストしてください。</p>
+            <p>WebSnipが動作すると、この要素の詳細情報（CSSセレクタ、テキスト内容、要素の種類など）が構造化された形式でクリップボードにコピーされます。</p>
+        </div>
+        
+        <div class="demo-container">
+            <h2>💡 WebSnipの利点</h2>
+            <ul>
+                <li><strong>🎯 AI最適化:</strong> ChatGPT、Claude等のAIツールで使いやすい形式</li>
+                <li><strong>🔍 構造化情報:</strong> CSSセレクタで要素の正確な位置を特定</li>
+                <li><strong>🔒 プライバシー重視:</strong> 完全ローカル処理、外部通信なし</li>
+                <li><strong>⚡ 高速処理:</strong> 軽量設計でブラウザに負荷をかけません</li>
+                <li><strong>🛡️ セキュア:</strong> 最小権限、脆弱性ゼロ</li>
+                <li><strong>🔧 開発者フレンドリー:</strong> オープンソース、カスタマイズ可能</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Add some interactive behavior for demo
+        document.addEventListener('contextmenu', function(e) {
+            console.log('Right-click detected on:', e.target);
+            console.log('Element type:', e.target.tagName);
+            console.log('Element classes:', e.target.className);
+        });
+        
+        // Highlight elements on hover for demo purposes
+        document.addEventListener('mouseover', function(e) {
+            if (e.target.closest('.context-menu-demo')) {
+                e.target.style.outline = '2px solid #4285f4';
+            }
+        });
+        
+        document.addEventListener('mouseout', function(e) {
+            e.target.style.outline = '';
+        });
+    </script>
+</body>
+</html>
