@@ -1,0 +1,54 @@
+{
+  "name": "websnip-chrome-extension",
+  "version": "1.0.0",
+  "description": "Web content snipper with structural context for AI tools",
+  "main": "src/background.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "npm run test && cp src/* dist/",
+    "dev": "npm run test:watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pakuo3906/websnip-chrome-extension.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "web-scraping",
+    "ai-tools",
+    "clipboard",
+    "tdd"
+  ],
+  "author": "WebSnip Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-chrome": "^0.8.0",
+    "puppeteer": "^21.5.2",
+    "@testing-library/dom": "^9.3.4",
+    "@testing-library/user-event": "^14.5.1"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/manifest.json"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}
