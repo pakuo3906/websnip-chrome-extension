@@ -7,7 +7,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "build": "npm run test && mkdir -p dist && cp src/* dist/",
+    "build": "npm run test && mkdir -p dist && cp -r src/* dist/",
     "dev": "npm run test:watch"
   },
   "repository": {
