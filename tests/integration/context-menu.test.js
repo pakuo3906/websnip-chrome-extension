@@ -153,7 +153,7 @@ describe('Context Menu Integration', () => {
 
       // Script execution環境をテスト
       expect(window.getSelection).toBeDefined();
-      expect(window.location.href).toBe('https://example.com/test');
+      expect(mockWindow.location.href).toBe('https://example.com/test');
       expect(navigator.clipboard.writeText).toBeDefined();
     });
   });

@@ -1,7 +1,7 @@
 // Media formatting tests for AI output
 // TDD for formatting different media types
 
-import { formatMediaForAI, formatDuration } from '../../src/content/media-formatter.js';
+const { formatMediaForAI, formatDuration } = require('../../src/content/media-formatter.js');
 
 describe('Media Formatting for AI', () => {
   describe('formatMediaForAI', () => {

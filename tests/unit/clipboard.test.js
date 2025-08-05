@@ -1,7 +1,7 @@
 // Clipboard functionality tests
 // TDD for copy operations and fallback mechanisms
 
-import { copyToClipboard, showNotification } from '../../src/content/utils.js';
+const { copyToClipboard, showNotification } = require('../../src/content/utils.js');
 
 describe('Clipboard Operations', () => {
   beforeEach(() => {
@@ -145,6 +145,7 @@ describe('Clipboard Operations', () => {
 
     test('should set up auto-removal timer', () => {
       jest.useFakeTimers();
+      jest.spyOn(global, 'setTimeout');
       
       const mockElement = {
         style: { cssText: '' },

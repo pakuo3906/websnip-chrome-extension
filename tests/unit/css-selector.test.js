@@ -1,12 +1,23 @@
 // CSS Selector generation tests
 // TDD approach: Red -> Green -> Refactor
 
-import { generateCSSSelector } from '../../src/content/utils.js';
+const { generateCSSSelector } = require('../../src/content/utils.js');
 
 describe('CSS Selector Generation', () => {
   beforeEach(() => {
     // DOMを初期化
     document.body.innerHTML = '';
+    
+    // カスタムマッチャーを追加
+    expect.extend({
+      toBeValidCSSSelector(received) {
+        const isValid = typeof received === 'string' && received.length > 0;
+        return {
+          message: () => `expected ${received} to be a valid CSS selector`,
+          pass: isValid
+        };
+      }
+    });
   });
 
   describe('Basic element detection', () => {

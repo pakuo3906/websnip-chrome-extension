@@ -1,7 +1,7 @@
 // Media element detection tests (TDD - Red Phase)
 // Testing image, video, audio, and link detection functionality
 
-import { getElementType, getMediaInfo } from '../../src/content/media-handler.js';
+const { getElementType, getMediaInfo } = require('../../src/content/media-handler.js');
 
 describe('Media Element Detection', () => {
   beforeEach(() => {
@@ -133,9 +133,11 @@ describe('Media Element Detection', () => {
         const video = document.createElement('video');
         video.src = 'https://example.com/test.mp4';
         video.poster = 'https://example.com/poster.jpg';
-        video.duration = 120; // 2 minutes
-        video.videoWidth = 1920;
-        video.videoHeight = 1080;
+        
+        // JSdomではvideo.durationはデフォルトでNaNになるため、モックでプロパティを設定
+        Object.defineProperty(video, 'duration', { value: 120, writable: true });
+        Object.defineProperty(video, 'videoWidth', { value: 1920, writable: true });
+        Object.defineProperty(video, 'videoHeight', { value: 1080, writable: true });
         
         const info = getMediaInfo(video);
         
@@ -179,7 +181,9 @@ describe('Media Element Detection', () => {
       test('should extract basic audio information', () => {
         const audio = document.createElement('audio');
         audio.src = 'https://example.com/test.mp3';
-        audio.duration = 180; // 3 minutes
+        
+        // JSdomではaudio.durationはデフォルトでNaNになるため、モックでプロパティを設定
+        Object.defineProperty(audio, 'duration', { value: 180, writable: true });
         
         const info = getMediaInfo(audio);
         

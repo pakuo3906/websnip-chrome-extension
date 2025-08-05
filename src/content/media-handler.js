@@ -6,7 +6,7 @@
  * @param {Element} element - 判定対象の要素
  * @returns {string} 要素タイプ ('image', 'video', 'audio', 'link', 'text', 'unknown')
  */
-export function getElementType(element) {
+function getElementType(element) {
   if (!element) {
     return 'unknown';
   }
@@ -48,7 +48,7 @@ export function getElementType(element) {
  * @param {Element} element - 対象要素
  * @returns {Object} メディア情報
  */
-export function getMediaInfo(element) {
+function getMediaInfo(element) {
   if (!element) {
     return { type: 'unknown' };
   }
@@ -238,3 +238,14 @@ function extractFormatFromUrl(url, mediaType) {
   const formats = validFormats[mediaType] || [];
   return formats.includes(extension) ? extension : 'unknown';
 }
+
+module.exports = {
+  getElementType,
+  getMediaInfo,
+  extractImageInfo,
+  extractVideoInfo,
+  extractAudioInfo,
+  extractLinkInfo,
+  extractTextInfo,
+  extractFormatFromUrl
+};

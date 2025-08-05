@@ -1,7 +1,7 @@
 // Text selection functionality tests
 // TDD approach for selection detection and formatting
 
-import { getSelectionInfo, formatForAI } from '../../src/content/utils.js';
+const { getSelectionInfo, formatForAI } = require('../../src/content/utils.js');
 
 describe('Text Selection', () => {
   beforeEach(() => {

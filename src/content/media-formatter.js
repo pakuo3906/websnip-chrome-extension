@@ -8,7 +8,7 @@
  * @param {string} cssSelector - CSS selector
  * @returns {string} フォーマット済みテキスト
  */
-export function formatMediaForAI(mediaInfo, pageUrl, cssSelector) {
+function formatMediaForAI(mediaInfo, pageUrl, cssSelector) {
   if (!mediaInfo || !mediaInfo.type) {
     return `要素タイプ: 不明
 
@@ -199,7 +199,7 @@ ${cssSelector}
  * @param {number|string} duration - 秒数
  * @returns {string} フォーマット済み時間
  */
-export function formatDuration(duration) {
+function formatDuration(duration) {
   if (duration === 'unknown' || duration === null || duration === undefined || 
       isNaN(duration) || duration < 0) {
     return '不明';
@@ -229,3 +229,9 @@ function formatSize(width, height) {
   }
   return `${width}x${height}`;
 }
+
+module.exports = {
+  formatMediaForAI,
+  formatDuration,
+  formatSize
+};

@@ -6,7 +6,7 @@
  * @param {Element} element - 対象要素
  * @returns {string} CSS selector path
  */
-export function generateCSSSelector(element) {
+function generateCSSSelector(element) {
   if (!element || element.nodeType !== Node.ELEMENT_NODE) {
     return "unknown";
   }
@@ -49,7 +49,7 @@ export function generateCSSSelector(element) {
  * 選択されたテキストの情報を取得
  * @returns {Object|null} 選択情報またはnull
  */
-export function getSelectionInfo() {
+function getSelectionInfo() {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
   
@@ -76,7 +76,7 @@ export function getSelectionInfo() {
  * @param {string} selector - CSSセレクタ
  * @returns {string} フォーマット済みテキスト
  */
-export function formatForAI(selectedText, url, selector) {
+function formatForAI(selectedText, url, selector) {
   return `選択テキスト：
 ${selectedText}
 
@@ -94,7 +94,7 @@ ${selector}
  * @param {string} message - 通知メッセージ
  * @param {string} type - 通知タイプ ('success', 'error', 'info')
  */
-export function showNotification(message, type = "info") {
+function showNotification(message, type = "info") {
   // Create notification element
   const notification = document.createElement('div');
   notification.style.cssText = `
@@ -129,7 +129,7 @@ export function showNotification(message, type = "info") {
  * @param {string} text - コピーするテキスト
  * @returns {Promise<boolean>} コピー成功・失敗
  */
-export async function copyToClipboard(text) {
+async function copyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
     return true;
@@ -151,3 +151,11 @@ export async function copyToClipboard(text) {
     }
   }
 }
+
+module.exports = {
+  generateCSSSelector,
+  getSelectionInfo,
+  formatForAI,
+  showNotification,
+  copyToClipboard
+};
