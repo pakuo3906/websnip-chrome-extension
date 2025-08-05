@@ -7,7 +7,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "build": "npm run test && cp src/* dist/",
+    "build": "npm run test && mkdir -p dist && cp src/* dist/",
     "dev": "npm run test:watch"
   },
   "repository": {
@@ -24,17 +24,19 @@
   "author": "WebSnip Contributors",
   "license": "MIT",
   "devDependencies": {
-    "jest": "^27.5.1",
-    "@types/jest": "^27.5.2",
-    "jest-environment-jsdom": "^27.5.1",
-    "jest-chrome": "^0.8.0",
-    "puppeteer": "^21.5.2",
     "@testing-library/dom": "^9.3.4",
-    "@testing-library/user-event": "^14.5.1"
+    "@testing-library/user-event": "^14.5.1",
+    "@types/jest": "^27.5.2",
+    "jest": "^27.5.1",
+    "jest-chrome": "^0.8.0",
+    "jest-environment-jsdom": "^27.5.1",
+    "puppeteer": "^24.15.0"
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ],
     "testMatch": [
       "**/tests/**/*.test.js"
     ],
