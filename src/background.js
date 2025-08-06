@@ -33,6 +33,57 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           return videoSiteDomains.some(domain => hostname.includes(domain));
         }
         
+        function isVideoThumbnail(element) {
+          if (!element || element.tagName?.toLowerCase() !== 'img') {
+            return false;
+          }
+          
+          // YouTube動画サムネイルの特徴を検出
+          const src = element.src || '';
+          const alt = element.alt || '';
+          
+          // YouTube サムネイル URL パターン
+          const youtubeThumbPatterns = [
+            /i\.ytimg\.com\/vi\//,
+            /img\.youtube\.com\/vi\//,
+            /i\.ytimg\.com\/vi_webp\//
+          ];
+          
+          // YouTube サムネイル特有のパターンをチェック
+          if (youtubeThumbPatterns.some(pattern => pattern.test(src))) {
+            return true;
+          }
+          
+          // 親要素構造での判定（YouTube特有のDOM構造）
+          const parentLink = element.closest('a');
+          if (parentLink) {
+            // YouTube動画リンクを持つ親要素があるかチェック
+            if (isVideoLink({ closest: () => parentLink })) {
+              return true;
+            }
+            
+            // YouTube特有のクラス名やDOM構造をチェック
+            const ytdThumbnail = element.closest('ytd-thumbnail');
+            const ytdMedia = element.closest('ytd-rich-grid-media, ytd-video-preview, ytd-compact-video-renderer');
+            
+            if (ytdThumbnail || ytdMedia) {
+              return true;
+            }
+          }
+          
+          // その他の動画サイトのサムネイル判定
+          const videoThumbPatterns = [
+            // ニコニコ動画
+            /nicovideo\.cdn\.nimg\.jp\/thumbnails\//,
+            // Vimeo
+            /i\.vimeocdn\.com\/video\//,
+            // Bilibili
+            /i\d\.hdslb\.com\/bfs\/archive\//
+          ];
+          
+          return videoThumbPatterns.some(pattern => pattern.test(src));
+        }
+        
         function isVideoLink(element) {
           const link = element.closest('a');
           if (!link || !link.href) return false;
@@ -137,6 +188,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           switch (tagName) {
             case 'img':
             case 'picture':
+              // 動画サムネイルかどうかをチェック
+              if (isVideoThumbnail(element)) {
+                return 'video';
+              }
               return 'image';
             case 'video':
               return 'video';
@@ -225,6 +280,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         }
 
         function extractVideoInfo(element) {
+          // 動画サムネイル画像の処理
+          if (element.tagName.toLowerCase() === 'img' && isVideoThumbnail(element)) {
+            return extractVideoThumbnailInfo(element);
+          }
+
           if (element.tagName.toLowerCase() === 'iframe') {
             const src = element.src || '';
             let platform = 'unknown';
@@ -262,6 +322,66 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             width: element.videoWidth || element.width || 0,
             height: element.videoHeight || element.height || 0,
             format: format
+          };
+        }
+        
+        function extractVideoThumbnailInfo(element) {
+          const src = element.src || '';
+          const alt = element.alt || '';
+          const parentLink = element.closest('a');
+          
+          let platform = 'unknown';
+          let videoId = '';
+          let videoUrl = '';
+          
+          // YouTube サムネイルから動画IDを抽出
+          if (src.includes('ytimg.com')) {
+            platform = 'youtube';
+            const thumbMatch = src.match(/\/vi\/([^\/]+)\//);
+            if (thumbMatch) {
+              videoId = thumbMatch[1];
+              videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+            }
+          }
+          
+          // 親リンクから動画URLを取得（優先）
+          if (parentLink && parentLink.href) {
+            if (parentLink.href.includes('youtube.com/watch') || parentLink.href.includes('youtu.be/')) {
+              videoUrl = parentLink.href;
+              platform = 'youtube';
+              
+              // URLから動画IDを再抽出
+              const urlMatch = videoUrl.match(/(?:watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+              if (urlMatch) {
+                videoId = urlMatch[1];
+              }
+            } else if (parentLink.href.includes('nicovideo.jp')) {
+              videoUrl = parentLink.href;
+              platform = 'nicovideo';
+              const niconicoMatch = videoUrl.match(/watch\/([^?&#]+)/);
+              if (niconicoMatch) {
+                videoId = niconicoMatch[1];
+              }
+            } else if (parentLink.href.includes('vimeo.com')) {
+              videoUrl = parentLink.href;
+              platform = 'vimeo';
+              const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/);
+              if (vimeoMatch) {
+                videoId = vimeoMatch[1];
+              }
+            }
+          }
+          
+          return {
+            type: 'video',
+            url: videoUrl || parentLink?.href || window.location.href,
+            thumbnailUrl: src,
+            platform: platform,
+            videoId: videoId,
+            alt: alt,
+            width: element.width || element.naturalWidth || 0,
+            height: element.height || element.naturalHeight || 0,
+            format: 'thumbnail'
           };
         }
 
@@ -323,71 +443,27 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
         function formatMediaForAI(mediaInfo, pageUrl, cssSelector) {
           if (!mediaInfo || !mediaInfo.type) {
-            return `要素タイプ: 不明\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+            return `URL: ${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
           }
 
           switch (mediaInfo.type) {
             case 'image':
-              const alt = mediaInfo.alt || '(なし)';
-              const size = formatSize(mediaInfo.width, mediaInfo.height);
-              const format = mediaInfo.format === 'unknown' ? '不明' : mediaInfo.format;
-              
-              return `要素タイプ: 画像\n\n要素情報:\n- URL: ${mediaInfo.url}\n- 説明: ${alt}\n- サイズ: ${size}\n- 形式: ${format}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'video':
-              let videoDetails = `- URL: ${mediaInfo.url}`;
-              
-              if (mediaInfo.platform) {
-                const platformName = mediaInfo.platform === 'youtube' ? 'YouTube' : 
-                                    mediaInfo.platform === 'vimeo' ? 'Vimeo' : mediaInfo.platform;
-                videoDetails += `\n- プラットフォーム: ${platformName}`;
-                
-                if (mediaInfo.videoId) {
-                  videoDetails += `\n- 動画ID: ${mediaInfo.videoId}`;
-                }
-              }
-              
-              if (mediaInfo.poster) {
-                videoDetails += `\n- ポスター: ${mediaInfo.poster}`;
-              }
-              
-              if (mediaInfo.duration !== undefined && mediaInfo.duration !== 0) {
-                const duration = formatDuration(mediaInfo.duration);
-                videoDetails += `\n- 長さ: ${duration}`;
-              }
-              
-              const videoSize = formatSize(mediaInfo.width, mediaInfo.height);
-              videoDetails += `\n- サイズ: ${videoSize}`;
-              
-              const videoFormat = mediaInfo.format === 'unknown' ? '不明' : mediaInfo.format;
-              videoDetails += `\n- 形式: ${videoFormat}`;
-
-              return `要素タイプ: 動画\n\n要素情報:\n${videoDetails}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'audio':
-              let audioDetails = `- URL: ${mediaInfo.url}`;
-              
-              if (mediaInfo.duration !== undefined && mediaInfo.duration !== 'unknown') {
-                const duration = formatDuration(mediaInfo.duration);
-                audioDetails += `\n- 長さ: ${duration}`;
-              }
-              
-              const audioFormat = mediaInfo.format === 'unknown' ? '不明' : mediaInfo.format;
-              audioDetails += `\n- 形式: ${audioFormat}`;
-
-              return `要素タイプ: 音声\n\n要素情報:\n${audioDetails}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'link':
-              const text = mediaInfo.text || '(なし)';
-              const title = mediaInfo.title || '(なし)';
-
-              return `要素タイプ: リンク\n\n要素情報:\n- URL: ${mediaInfo.url}\n- テキスト: ${text}\n- タイトル: ${title}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'text':
               return `選択テキスト:\n${mediaInfo.content}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             default:
-              return `要素タイプ: 不明\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              return `URL: ${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
           }
         }
 

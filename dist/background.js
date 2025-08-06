@@ -443,27 +443,86 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
         function formatMediaForAI(mediaInfo, pageUrl, cssSelector) {
           if (!mediaInfo || !mediaInfo.type) {
-            return `URL: ${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+            return `要素タイプ: 不明\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
           }
 
           switch (mediaInfo.type) {
             case 'image':
-              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              const alt = mediaInfo.alt || '(なし)';
+              const size = formatSize(mediaInfo.width, mediaInfo.height);
+              const format = mediaInfo.format === 'unknown' ? '不明' : mediaInfo.format;
+              
+              return `要素タイプ: 画像\n\n要素情報:\n- URL: ${mediaInfo.url}\n- 説明: ${alt}\n- サイズ: ${size}\n- 形式: ${format}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'video':
-              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              let videoDetails = `- URL: ${mediaInfo.url}`;
+              
+              if (mediaInfo.platform) {
+                const platformName = mediaInfo.platform === 'youtube' ? 'YouTube' : 
+                                    mediaInfo.platform === 'vimeo' ? 'Vimeo' : 
+                                    mediaInfo.platform === 'nicovideo' ? 'ニコニコ動画' : mediaInfo.platform;
+                videoDetails += `\n- プラットフォーム: ${platformName}`;
+                
+                if (mediaInfo.videoId) {
+                  videoDetails += `\n- 動画ID: ${mediaInfo.videoId}`;
+                }
+              }
+              
+              // サムネイル情報がある場合
+              if (mediaInfo.thumbnailUrl) {
+                videoDetails += `\n- サムネイル: ${mediaInfo.thumbnailUrl}`;
+              }
+              
+              if (mediaInfo.poster) {
+                videoDetails += `\n- ポスター: ${mediaInfo.poster}`;
+              }
+              
+              if (mediaInfo.alt) {
+                videoDetails += `\n- 説明: ${mediaInfo.alt}`;
+              }
+              
+              if (mediaInfo.duration !== undefined && mediaInfo.duration !== 0) {
+                const duration = formatDuration(mediaInfo.duration);
+                videoDetails += `\n- 長さ: ${duration}`;
+              }
+              
+              const videoSize = formatSize(mediaInfo.width, mediaInfo.height);
+              if (mediaInfo.format === 'thumbnail') {
+                videoDetails += `\n- サムネイルサイズ: ${videoSize}`;
+              } else {
+                videoDetails += `\n- サイズ: ${videoSize}`;
+              }
+              
+              const videoFormat = mediaInfo.format === 'unknown' ? '不明' : 
+                                  mediaInfo.format === 'thumbnail' ? 'サムネイル画像' : mediaInfo.format;
+              videoDetails += `\n- 形式: ${videoFormat}`;
+
+              return `要素タイプ: 動画\n\n要素情報:\n${videoDetails}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'audio':
-              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              let audioDetails = `- URL: ${mediaInfo.url}`;
+              
+              if (mediaInfo.duration !== undefined && mediaInfo.duration !== 'unknown') {
+                const duration = formatDuration(mediaInfo.duration);
+                audioDetails += `\n- 長さ: ${duration}`;
+              }
+              
+              const audioFormat = mediaInfo.format === 'unknown' ? '不明' : mediaInfo.format;
+              audioDetails += `\n- 形式: ${audioFormat}`;
+
+              return `要素タイプ: 音声\n\n要素情報:\n${audioDetails}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'link':
-              return `URL: ${mediaInfo.url}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              const text = mediaInfo.text || '(なし)';
+              const title = mediaInfo.title || '(なし)';
+
+              return `要素タイプ: リンク\n\n要素情報:\n- URL: ${mediaInfo.url}\n- テキスト: ${text}\n- タイトル: ${title}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             case 'text':
               return `選択テキスト:\n${mediaInfo.content}\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
             
             default:
-              return `URL: ${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
+              return `要素タイプ: 不明\n\nページURL:\n${pageUrl}\n\n構造的な位置:\n${cssSelector}\n\n指示:`;
           }
         }
 
